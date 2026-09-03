@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SkillSwap — Tukar Skill, Tumbuh Bersama</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0b0d10;
+            --surface: #12151a;
+            --surface-2: #181c22;
+            --border: #252a32;
+            --text: #f5f7fa;
+            --muted: #9299a5;
+            --primary: #ffffff;
+            --success: #55c98a;
+            --danger: #e87575;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =========================
+           NAVBAR
+        ========================== */
+
+        .navbar {
+            height: 68px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            position: sticky;
+            top: 0;
+            background: rgba(11, 13, 16, 0.94);
+            backdrop-filter: blur(15px);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .points {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #303640;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* =========================
+           LAYOUT
+        ========================== */
+
+        .app {
+            max-width: 1100px;
+            margin: auto;
+            padding: 32px 20px 100px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* =========================
+           DISCOVER
+        ========================== */
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 30px;
+            margin-bottom: 7px;
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .search {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 12px;
+            outline: none;
+            margin-bottom: 24px;
+        }
+
+        .search:focus {
+            border-color: #454c57;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .user-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            transition: 0.2s;
+        }
+
+        .user-card:hover {
+            border-color: #414852;
+            transform: translateY(-2px);
+        }
+
+        .user-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .big-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #303640;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-name {
+            font-weight: 700;
+        }
+
+        .verified {
+            color: var(--success);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .skill-section {
+            margin-bottom: 16px;
+        }
+
+        .label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 7px;
+        }
+
+        .skill {
+            display: inline-block;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin: 3px 3px 3px 0;
+        }
+
+        .skill.need {
+            color: #d6dae0;
+        }
+
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: white;
+            padding: 11px;
+            border-radius: 9px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: var(--surface-2);
+        }
+
+        .btn.primary {
+            background: white;
+            color: black;
+            border-color: white;
+        }
+
+        /* =========================
+           OFFERS
+        ========================== */
+
+        .offer-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .offer {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .offer-info h3 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .offer-info p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .status {
+            font-size: 12px;
+            color: var(--success);
+        }
+
+        /* =========================
+           MATCH
+        ========================== */
+
+        .match-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .match-user {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .match-score {
+            margin-left: auto;
+            font-weight: 700;
+        }
+
+        .match-line {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        /* =========================
+           PROFILE
+        ========================== */
+
+        .profile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 25px;
+        }
+
+        .profile-head {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #303640;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .profile h2 {
+            margin-bottom: 5px;
+        }
+
+        .profile p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: var(--surface-2);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =========================
+           BOTTOM NAV
+        ========================== */
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 68px;
+            background: rgba(11, 13, 16, 0.96);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 100px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .nav-btn.active {
+            color: white;
+        }
+
+        .nav-icon {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        /* =========================
+           MODAL
+        ========================== */
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 200;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 430px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .modal-box h2 {
+            margin-bottom: 8px;
+        }
+
+        .modal-box p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================== */
+
+        @media (max-width: 800px) {
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .points {
+                display: none;
+            }
+
+            .app {
+                padding: 25px 15px 95px;
+            }
+
+            .page-header h1 {
+                font-size: 25px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .offer {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .nav-btn {
+                width: 75px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVBAR
+    ========================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            SkillSwap <span>/</span>
+        </div>
+
+        <div class="nav-right">
+
+            <div class="points">
+                ✦ 120 Skill Points
+            </div>
+
+            <div class="avatar">
+                GU
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =========================
+         APP
+    ========================== -->
+
+    <main class="app">
+
+
+        <!-- DISCOVER -->
+
+        <section id="discover" class="page active">
+
+            <div class="page-header">
+                <h1>Temukan Skill</h1>
+                <p>Temukan orang yang bisa mengajarkan skill yang kamu butuhkan.</p>
+            </div>
+
+            <input
+                id="searchInput"
+                class="search"
+                type="text"
+                placeholder="Cari skill, misalnya Video Editing..."
+                oninput="searchUsers()"
+            >
+
+            <div id="userCards" class="cards">
+
+                <div class="user-card" data-search="video editing photoshop">
+
+                    <div class="user-top">
+                        <div class="big-avatar">AR</div>
+
+                        <div>
+                            <div class="user-name">Ardi</div>
+                            <div class="verified">✓ Terverifikasi</div>
+                        </div>
+                    </div>
+
+                    <div class="skill-section">
+                        <div class="label">Dia menawarkan</div>
+
+                        <span class="skill">
+                            Video Editing
+                        </span>
+
+                        <span class="skill">
+                            CapCut
+                        </span>
+                    </div>
+
+                    <div class="skill-section">
+                        <div class="label">Dia membutuhkan</div>
+
+                        <span class="skill need">
+                            Photoshop
+                        </span>
+                    </div>
+
+                    <div class="card-actions">
+
+                        <button
+                            class="btn"
+                            onclick="skipUser('Ardi')"
+                        >
+                            Lewati
+                        </button>
+
+                        <button
+                            class="btn primary"
+                            onclick="requestSwap('Ardi')"
+                        >
+                            ↔ Swap
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="user-card" data-search="coding javascript website">
+
+                    <div class="user-top">
+                        <div class="big-avatar">DN</div>
+
+                        <div>
+                            <div class="user-name">Dina</div>
+                            <div class="verified">✓ Terverifikasi</div>
+                        </div>
+                    </div>
+
+                    <div class="skill-section">
+                        <div class="label">Dia menawarkan</div>
+
+                        <span class="skill">
+                            Coding
+                        </span>
+
+                        <span class="skill">
+                            JavaScript
+                        </span>
+                    </div>
+
+                    <div class="skill-section">
+                        <div class="label">Dia membutuhkan</div>
+
+                        <span class="skill need">
+                            UI Design
+                        </span>
+                    </div>
+
+                    <div class="card-actions">
+
+                        <button
+                            class="btn"
+                            onclick="skipUser('Dina')"
+                        >
+                            Lewati
+                        </button>
+
+                        <button
+                            class="btn primary"
+                            onclick="requestSwap('Dina')"
+                        >
+                            ↔ Swap
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="user-card" data-search="design ui figma">
+
+                    <div class="user-top">
+                        <div class="big-avatar">RF</div>
+
+                        <div>
+                            <div class="user-name">Rafi</div>
+                            <div class="verified">✓ Terverifikasi</div>
+                        </div>
+                    </div>
+
+                    <div class="skill-section">
+                        <div class="label">Dia menawarkan</div>
+
+                        <span class="skill">
+                            UI Design
+                        </span>
+
+                        <span class="skill">
+                            Figma
+                        </span>
+                    </div>
+
+                    <div class="skill-section">
+                        <div class="label">Dia membutuhkan</div>
+
+                        <span class="skill need">
+                            Video Editing
+                        </span>
+                    </div>
+
+                    <div class="card-actions">
+
+                        <button
+                            class="btn"
+                            onclick="skipUser('Rafi')"
+                        >
+                            Lewati
+                        </button>
+
+                        <button
+                            class="btn primary"
+                            onclick="requestSwap('Rafi')"
+                        >
+                            ↔ Swap
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- OFFERS -->
+
+        <section id="offers" class="page">
+
+            <div class="page-header">
+
+                <h1>Penawaran</h1>
+
+                <p>
+                    Kelola permintaan Skill Swap kamu.
+                </p>
+
+            </div>
+
+            <div class="offer-list">
+
+                <div class="offer">
+
+                    <div class="offer-info">
+
+                        <h3>Dina ingin bertukar skill denganmu</h3>
+
+                        <p>
+                            Kamu: Video Editing → Dina: JavaScript
+                        </p>
+
+                    </div>
+
+                    <div class="status">
+                        Menunggu
+                    </div>
+
+                </div>
+
+
+                <div class="offer">
+
+                    <div class="offer-info">
+
+                        <h3>Rafi menerima Skill Swap</h3>
+
+                        <p>
+                            UI Design ↔ Video Editing
+                        </p>
+
+                    </div>
+
+                    <div class="status">
+                        Match
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- MATCH -->
+
+        <section id="matches" class="page">
+
+            <div class="page-header">
+
+                <h1>Match</h1>
+
+                <p>
+                    Partner Skill Swap yang cocok denganmu.
+                </p>
+
+            </div>
+
+            <div class="match-box">
+
+                <div class="match-user">
+
+                    <div class="big-avatar">
+                        RF
+                    </div>
+
+                    <div>
+                        <strong>Rafi</strong>
+                        <p style="color:var(--muted);font-size:12px;">
+                            UI Designer
+                        </p>
+                    </div>
+
+                    <div class="match-score">
+                        92%
+                    </div>
+
+                </div>
+
+                <div class="match-line"></div>
+
+                <p style="color:var(--muted);font-size:13px;">
+                    Kamu menawarkan <strong style="color:white;">
+                    Video Editing
+                    </strong>
+                    dan Rafi membutuhkan skill tersebut.
+                </p>
+
+                <br>
+
+                <button
+                    class="btn primary"
+                    style="width:100%;"
+                    onclick="openChat('Rafi')"
+                >
+                    Buka Chat
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- PROFILE -->
+
+        <section id="profile" class="page">
+
+            <div class="page-header">
+
+                <h1>Profil</h1>
+
+                <p>
+                    Kelola identitas dan skill kamu.
+                </p>
+
+            </div>
+
+            <div class="profile">
+
+                <div class="profile-head">
+
+                    <div class="profile-avatar">
+                        GU
+                    </div>
+
+                    <div>
+
+                        <h2>Gue</h2>
+
+                        <p>
+                            Skill Swapper sejak 2026
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stats">
+
+                    <div class="stat">
+                        <strong>12</strong>
+                        <span>Swap</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong>8</strong>
+                        <span>Match</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong>4.9</strong>
+                        <span>Rating</span>
+                    </div>
+
+                </div>
+
+
+                <div class="skill-section">
+
+                    <div class="label">
+                        Skill yang kamu tawarkan
+                    </div>
+
+                    <span class="skill">
+                        Video Editing
+                    </span>
+
+                    <span class="skill">
+                        CapCut
+                    </span>
+
+                </div>
+
+
+                <div class="skill-section">
+
+                    <div class="label">
+                        Skill yang kamu cari
+                    </div>
+
+                    <span class="skill need">
+                        Coding
+                    </span>
+
+                    <span class="skill need">
+                        UI Design
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         BOTTOM NAV
+    ========================== -->
+
+    <nav class="bottom-nav">
+
+        <button
+            class="nav-btn active"
+            onclick="showPage('discover', this)"
+        >
+            <span class="nav-icon">⌕</span>
+            Temukan
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="showPage('offers', this)"
+        >
+            <span class="nav-icon">⇄</span>
+            Penawaran
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="showPage('matches', this)"
+        >
+            <span class="nav-icon">♡</span>
+            Match
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="showPage('profile', this)"
+        >
+            <span class="nav-icon">○</span>
+            Profil
+        </button>
+
+    </nav>
+
+
+    <!-- =========================
+         MODAL
+    ========================== -->
+
+    <div id="modal" class="modal">
+
+        <div class="modal-box">
+
+            <h2 id="modalTitle">
+                Skill Swap
+            </h2>
+
+            <p id="modalText">
+                ...
+            </p>
+
+            <div class="modal-actions">
+
+                <button
+                    class="btn"
+                    onclick="closeModal()"
+                    style="flex:1;"
+                >
+                    Batal
+                </button>
+
+                <button
+                    class="btn primary"
+                    onclick="confirmAction()"
+                    style="flex:1;"
+                >
+                    Lanjut
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        let selectedUser = "";
+
+        /* =========================
+           PAGE NAVIGATION
+        ========================== */
+
+        function showPage(pageId, button) {
+
+            const pages =
+                document.querySelectorAll(".page");
+
+            pages.forEach(page => {
+                page.classList.remove("active");
+            });
+
+            document
+                .getElementById(pageId)
+                .classList.add("active");
+
+
+            const buttons =
+                document.querySelectorAll(".nav-btn");
+
+            buttons.forEach(btn => {
+                btn.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+
+        /* =========================
+           SEARCH
+        ========================== */
+
+        function searchUsers() {
+
+            const query =
+                document
+                .getElementById("searchInput")
+                .value
+                .toLowerCase()
+                .trim();
+
+            const cards =
+                document.querySelectorAll(".user-card");
+
+            cards.forEach(card => {
+
+                const data =
+                    card.dataset.search;
+
+                if (data.includes(query)) {
+
+                    card.style.display = "";
+
+                } else {
+
+                    card.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+
+        /* =========================
+           SWAP
+        ========================== */
+
+        function requestSwap(user) {
+
+            selectedUser = user;
+
+            document
+                .getElementById("modalTitle")
+                .textContent =
+                "Kirim Skill Swap";
+
+            document
+                .getElementById("modalText")
+                .textContent =
+                "Kamu ingin mengirim permintaan Skill Swap kepada " +
+                user +
+                ". Pada versi berikutnya, permintaan ini akan tersimpan di database.";
+
+            document
+                .getElementById("modal")
+                .classList.add("show");
+        }
+
+
+        function confirmAction() {
+
+            alert(
+                "Permintaan Skill Swap untuk " +
+                selectedUser +
+                " berhasil dibuat (demo)."
+            );
+
+            closeModal();
+        }
+
+
+        /* =========================
+           SKIP
+        ========================== */
+
+        function skipUser(user) {
+
+            alert(
+                user +
+                " dilewati. Sistem akan menampilkan rekomendasi berikutnya."
+            );
+
+        }
+
+
+        /* =========================
+           CHAT
+        ========================== */
+
+        function openChat(user) {
+
+            alert(
+                "Chat dengan " +
+                user +
+                " akan tersedia setelah sistem chat dan database dibuat."
+            );
+
+        }
+
+
+        /* =========================
+           MODAL
+        ========================== */
+
+        function closeModal() {
+
+            document
+                .getElementById("modal")
+                .classList.remove("show");
+
+        }
+
+
+        document
+            .getElementById("modal")
+            .addEventListener("click", function(event) {
+
+                if (event.target === this) {
+                    closeModal();
+                }
+
+            });
+
+    </script>
+
+</body>
+</html>
