@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillSwap Auth Test</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0b0f0e;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+    }
+
+    .box {
+      width: 90%;
+      max-width: 380px;
+      padding: 24px;
+      background: #121817;
+      border: 1px solid #26302e;
+      border-radius: 16px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    p {
+      color: #9ca8a5;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: 1px solid #303a38;
+      background: #0b0f0e;
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 10px;
+      background: #e8eee9;
+      color: #101514;
+      font-weight: bold;
+    }
+
+    #status {
+      margin-top: 16px;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h1>SkillSwap</h1>
+    <p>Test Register & Login</p>
+
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="register()">Daftar</button>
+    <button onclick="login()">Login</button>
+
+    <div id="status">Belum ada aktivitas.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = "https://zztdytaiunmpbsukbbhw.supabase.co";;
+    const SUPABASE_ANON_KEY = "sb_publishable_xVfQXVdoNt8AXm-g94gRBQ_XZMbJVKR;
+
+    const { createClient } = supabase;
+
+    const client = createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    const statusEl = document.getElementById("status");
+
+    function show(message, success = false) {
+      statusEl.textContent = message;
+      statusEl.style.color = success ? "#55c98a" : "#e87575";
+    }
+
+    async function register() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        return show("Isi email dan password dulu.");
+      }
+
+      if (password.length < 6) {
+        return show("Password minimal 6 karakter.");
+      }
+
+      show("Mendaftar...");
+
+      const { data, error } = await client.auth.signUp({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        return show("Gagal daftar: " + error.message);
+      }
+
+      show(
+        data.user
+          ? "Berhasil daftar. Cek email jika verifikasi aktif."
+          : "Pendaftaran diproses.",
+        true
+      );
+    }
+
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        return show("Isi email dan password dulu.");
+      }
+
+      show("Login...");
+
+      const { data, error } = await client.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        return show("Gagal login: " + error.message);
+      }
+
+      show(
+        "Login berhasil: " + (data.user?.email || email),
+        true
+      );
+    }
+  </script>
+
+</body>
+</html>
