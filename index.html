@@ -42,6 +42,22 @@
         }
 
         /* =========================
+           AUTH LOADING
+        ========================== */
+
+        #authLoading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 14px;
+            z-index: 300;
+        }
+
+        /* =========================
            NAVBAR
         ========================== */
 
@@ -503,6 +519,13 @@
 <body>
 
     <!-- =========================
+         AUTH LOADING
+    ========================== -->
+
+    <div id="authLoading">Memuat...</div>
+
+
+    <!-- =========================
          NAVBAR
     ========================== -->
 
@@ -518,7 +541,7 @@
                 ✦ 120 Skill Points
             </div>
 
-            <div class="avatar">
+            <div class="avatar" onclick="logout()">
                 GU
             </div>
 
@@ -1007,7 +1030,41 @@
     </div>
 
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+
     <script>
+
+        /* =========================
+           AUTH GUARD
+        ========================== */
+
+        let currentUser = null;
+
+        (async function checkAuth() {
+
+            const { data: { session } } = await sb.auth.getSession();
+
+            if (!session) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            currentUser = session.user;
+
+            document.getElementById("authLoading").style.display = "none";
+
+        })();
+
+
+        function logout() {
+
+            sb.auth.signOut().then(function() {
+                window.location.href = "login.html";
+            });
+
+        }
+
 
         let selectedUser = "";
 
