@@ -3,161 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SkillSwap Auth Test</title>
-
+  <title>SkillSwap — Cek Koneksi</title>
   <style>
     body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #0b0f0e;
-      color: #f5f5f5;
-      font-family: Arial, sans-serif;
+      margin: 0; min-height: 100vh; padding: 20px;
+      background: #0b0d10; color: #f5f7fa;
+      font-family: Arial, sans-serif; box-sizing: border-box;
     }
-
-    .box {
-      width: 90%;
-      max-width: 380px;
-      padding: 24px;
-      background: #121817;
-      border: 1px solid #26302e;
-      border-radius: 16px;
-      box-sizing: border-box;
+    h1 { font-size: 18px; margin-bottom: 4px; }
+    p.hint { color: #9299a5; font-size: 13px; margin-bottom: 20px; }
+    .row {
+      background: #12151a; border: 1px solid #252a32;
+      border-radius: 10px; padding: 14px; margin-bottom: 10px; font-size: 14px;
     }
-
-    h1 {
-      margin-top: 0;
-    }
-
-    p {
-      color: #9ca8a5;
-    }
-
-    input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 13px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid #303a38;
-      background: #0b0f0e;
-      color: white;
-    }
-
+    .ok { color: #55c98a; }
+    .fail { color: #e87575; }
     button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 8px;
-      border: 0;
-      border-radius: 10px;
-      background: #e8eee9;
-      color: #101514;
-      font-weight: bold;
+      padding: 12px 16px; border: none; border-radius: 8px;
+      background: #e8eee9; color: #101514; font-weight: bold;
+      margin-right: 8px; margin-top: 8px;
     }
-
-    #status {
-      margin-top: 16px;
-      white-space: pre-wrap;
-      font-size: 14px;
+    pre {
+      background: #0b0d10; border: 1px solid #252a32; border-radius: 8px;
+      padding: 10px; font-size: 12px; overflow-x: auto;
+      white-space: pre-wrap; word-break: break-word;
     }
   </style>
 </head>
-
 <body>
 
-  <div class="box">
-    <h1>SkillSwap</h1>
-    <p>Test Register & Login</p>
+  <h1>SkillSwap — Cek Koneksi Supabase</h1>
+  <p class="hint">Halaman ini cuma buat diagnosa. Tidak ada redirect, tidak dipanggil otomatis oleh index.html.</p>
 
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
+  <div class="row" id="cdnStatus">1. Cek CDN Supabase: memeriksa...</div>
+  <div class="row" id="clientStatus">2. Cek koneksi client: menunggu...</div>
+  <div class="row" id="sessionStatus">3. Cek status login: menunggu...</div>
 
-    <button onclick="register()">Daftar</button>
-    <button onclick="login()">Login</button>
+  <button onclick="runCheck()">Jalankan Cek Ulang</button>
+  <button onclick="showRawSession()">Lihat Detail Session</button>
 
-    <div id="status">Belum ada aktivitas.</div>
-  </div>
+  <pre id="rawOutput"></pre>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <script src="supabase-client.js"></script>
   <script>
-    const SUPABASE_URL = "https://zztdytaiunmpbsukbbhw.supabase.co";;
-    const SUPABASE_ANON_KEY = "sb_publishable_xVfQXVdoNt8AXm-g94gRBQ_XZMbJVKR";
-
-    const { createClient } = supabase;
-
-    const client = createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
-
-    const statusEl = document.getElementById("status");
-
-    function show(message, success = false) {
-      statusEl.textContent = message;
-      statusEl.style.color = success ? "#55c98a" : "#e87575";
+    function setRow(id, message, ok) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.className = "row " + (ok ? "ok" : "fail");
     }
 
-    async function register() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      if (!email || !password) {
-        return show("Isi email dan password dulu.");
+    async function runCheck() {
+      if (typeof supabase === "undefined") {
+        setRow("cdnStatus", "1. CDN Supabase: GAGAL DIMUAT (cek koneksi internet / CDN diblokir)", false);
+        setRow("clientStatus", "2. Cek koneksi client: dilewati (CDN gagal)", false);
+        setRow("sessionStatus", "3. Cek status login: dilewati (CDN gagal)", false);
+        return;
       }
+      setRow("cdnStatus", "1. CDN Supabase: berhasil dimuat", true);
 
-      if (password.length < 6) {
-        return show("Password minimal 6 karakter.");
+      if (typeof sb === "undefined") {
+        setRow("clientStatus", "2. Koneksi client: GAGAL (file supabase-client.js tidak ditemukan atau error)", false);
+        setRow("sessionStatus", "3. Cek status login: dilewati (client gagal)", false);
+        return;
       }
+      setRow("clientStatus", "2. Koneksi client: berhasil dibuat (URL & key terbaca)", true);
 
-      show("Mendaftar...");
-
-      const { data, error } = await client.auth.signUp({
-        email: email,
-        password: password
-      });
-
-      if (error) {
-        return show("Gagal daftar: " + error.message);
+      try {
+        const { data, error } = await sb.auth.getSession();
+        if (error) {
+          setRow("sessionStatus", "3. Cek status login: ERROR — " + error.message, false);
+          return;
+        }
+        if (data.session) {
+          setRow("sessionStatus", "3. Status login: SEDANG LOGIN sebagai " + data.session.user.email, true);
+        } else {
+          setRow("sessionStatus", "3. Status login: belum login (ini normal kalau kamu belum login)", true);
+        }
+      } catch (err) {
+        setRow("sessionStatus", "3. Cek status login: ERROR TAK TERDUGA — " + err.message, false);
       }
-
-      show(
-        data.user
-          ? "Berhasil daftar. Cek email jika verifikasi aktif."
-          : "Pendaftaran diproses.",
-        true
-      );
     }
 
-    async function login() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      if (!email || !password) {
-        return show("Isi email dan password dulu.");
-      }
-
-      show("Login...");
-
-      const { data, error } = await client.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-      if (error) {
-        return show("Gagal login: " + error.message);
-      }
-
-      show(
-        "Login berhasil: " + " membuka skilswapp..." ,
-        true
-      );setTimeout(() => {
-  window.location.href = "index.html";
-}, 1000);
+    async function showRawSession() {
+      const { data } = await sb.auth.getSession();
+      document.getElementById("rawOutput").textContent = JSON.stringify(data, null, 2);
     }
+
+    runCheck();
   </script>
-
 </body>
 </html>
