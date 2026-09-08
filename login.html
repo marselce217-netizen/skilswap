@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk — SkillSwap</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0b0d10;
+            --surface: #12151a;
+            --surface-2: #181c22;
+            --border: #252a32;
+            --text: #f5f7fa;
+            --muted: #9299a5;
+            --success: #55c98a;
+            --danger: #e87575;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        button, input { font: inherit; }
+        button { cursor: pointer; }
+        .auth-box {
+            width: 100%;
+            max-width: 380px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px;
+        }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+        .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--surface-2);
+            border-radius: 10px;
+            padding: 4px;
+        }
+        .tab {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .tab.active { background: white; color: black; }
+        input {
+            width: 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 13px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            outline: none;
+        }
+        input:focus { border-color: #454c57; }
+        .btn-submit {
+            width: 100%;
+            border: none;
+            background: white;
+            color: black;
+            padding: 13px;
+            border-radius: 10px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        #status { margin-top: 14px; font-size: 13px; min-height: 18px; }
+        #status.error { color: var(--danger); }
+        #status.success { color: var(--success); }
+        #status.info { color: var(--muted); }
+    </style>
+</head>
+<body>
+
+    <div class="auth-box">
+        <div class="logo">SkillSwap</div>
+        <div class="subtitle">Tukar Skill, Tumbuh Bersama</div>
+
+        <div class="tabs">
+            <button class="tab active" id="tabLogin" onclick="switchTab('login')">Masuk</button>
+            <button class="tab" id="tabRegister" onclick="switchTab('register')">Daftar</button>
+        </div>
+
+        <input id="email" type="email" placeholder="Email" autocomplete="email">
+        <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">Masuk</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+
+    <script>
+        let mode = "login";
+
+        function switchTab(target) {
+            mode = target;
+            document.getElementById("tabLogin").classList.toggle("active", target === "login");
+            document.getElementById("tabRegister").classList.toggle("active", target === "register");
+            document.getElementById("submitBtn").textContent = target === "login" ? "Masuk" : "Daftar";
+            setStatus("", "");
+        }
+
+        function setStatus(message, type) {
+            const el = document.getElementById("status");
+            el.textContent = message;
+            el.className = type || "";
+        }
+
+        async function submitForm() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!email || !password) return setStatus("Isi email dan password dulu.", "error");
+            if (password.length < 6) return setStatus("Password minimal 6 karakter.", "error");
+
+            if (mode === "login") {
+                setStatus("Memproses login...", "info");
+                const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                if (error) return setStatus("Gagal login: " + error.message, "error");
+                setStatus("Berhasil. Mengarahkan...", "success");
+                window.location.href = "index.html";
+            } else {
+                setStatus("Memproses pendaftaran...", "info");
+                const { data, error } = await sb.auth.signUp({ email, password });
+                if (error) return setStatus("Gagal daftar: " + error.message, "error");
+                if (data.session) {
+                    setStatus("Berhasil daftar. Mengarahkan...", "success");
+                    window.location.href = "index.html";
+                } else {
+                    setStatus("Berhasil daftar. Cek email untuk verifikasi, lalu masuk lewat tab Masuk.", "success");
+                }
+            }
+        }
+
+        (async function redirectIfLoggedIn() {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) window.location.href = "index.html";
+        })();
+    </script>
+</body>
+</html>
