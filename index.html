@@ -1386,9 +1386,7 @@
             if (error) {
                 console.error("Gagal memuat profil:", error);
                 showProfileError("Gagal memuat data profil. Tutup lalu coba lagi.");
-                document.getElementById("profileCancelBtn").disabled = false;
-                profileBusy = false;
-                return;
+                setProfileFormBusy(false);
             }
 
             if (!data) {
