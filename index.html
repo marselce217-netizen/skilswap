@@ -1,252 +1,1078 @@
-k="openChat('Rafi')"
-                >
-                    Buka Chat
-                </button>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSwap — Tukar Skill, Tumbuh Bersama</title>
 
-            </div>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-        </section>
+    :root {
+        --bg: #0b0d10;
+        --surface: #12151a;
+        --surface-2: #181c22;
+        --border: #252a32;
+        --text: #f5f7fa;
+        --muted: #9299a5;
+        --primary: #ffffff;
+        --success: #55c98a;
+        --danger: #e87575;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+    }
+
+    button,
+    input,
+    textarea {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    /* AUTH LOADING */
+
+    #authLoading {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 14px;
+        z-index: 300;
+    }
+
+    /* NAVBAR */
+
+    .navbar {
+        height: 68px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 22px;
+        position: sticky;
+        top: 0;
+        background: rgba(11, 13, 16, 0.94);
+        backdrop-filter: blur(15px);
+        z-index: 100;
+    }
+
+    .logo {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .logo span {
+        color: var(--muted);
+        font-weight: 400;
+    }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .points {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #303640;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    /* LAYOUT */
+
+    .app {
+        max-width: 1100px;
+        margin: auto;
+        padding: 32px 20px 100px;
+    }
+
+    .page {
+        display: none;
+    }
+
+    .page.active {
+        display: block;
+    }
+
+    /* DISCOVER */
+
+    .page-header {
+        margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+        font-size: 30px;
+        margin-bottom: 7px;
+        letter-spacing: -1px;
+    }
+
+    .page-header p {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .search {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: white;
+        padding: 14px 16px;
+        border-radius: 12px;
+        outline: none;
+        margin-bottom: 24px;
+    }
+
+    .search:focus {
+        border-color: #454c57;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .user-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 20px;
+        transition: 0.2s;
+    }
+
+    .user-card:hover {
+        border-color: #414852;
+        transform: translateY(-2px);
+    }
+
+    .user-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .big-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #303640;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .user-name {
+        font-weight: 700;
+    }
+
+    .verified {
+        color: var(--success);
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .skill-section {
+        margin-bottom: 16px;
+    }
+
+    .label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        margin-bottom: 7px;
+    }
+
+    .skill {
+        display: inline-block;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        padding: 7px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin: 3px 3px 3px 0;
+    }
+
+    .skill.need {
+        color: #d6dae0;
+    }
+
+    .card-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .btn {
+        border: 1px solid var(--border);
+        background: transparent;
+        color: white;
+        padding: 11px;
+        border-radius: 9px;
+        font-weight: 600;
+    }
+
+    .btn:hover {
+        background: var(--surface-2);
+    }
+
+    .btn.primary {
+        background: white;
+        color: black;
+        border-color: white;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* OFFERS */
+
+    .offer-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .offer {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 18px;
+        border-radius: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .offer-info h3 {
+        font-size: 15px;
+        margin-bottom: 6px;
+    }
+
+    .offer-info p {
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .status {
+        font-size: 12px;
+        color: var(--success);
+    }
+
+    /* MATCH */
+
+    .match-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 24px;
+    }
+
+    .match-user {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .match-score {
+        margin-left: auto;
+        font-weight: 700;
+    }
+
+    .match-line {
+        height: 1px;
+        background: var(--border);
+        margin: 20px 0;
+    }
+
+    /* PROFILE */
+
+    .profile {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 25px;
+    }
+
+    .profile-head {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: #303640;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .profile h2 {
+        margin-bottom: 5px;
+    }
+
+    .profile p {
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .profile-bio {
+        display: none;
+        color: #d6dae0;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-bio.show {
+        display: block;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    .stat {
+        background: var(--surface-2);
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .stat strong {
+        display: block;
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+
+    .stat span {
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    /* BOTTOM NAV */
+
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 68px;
+        background: rgba(11, 13, 16, 0.96);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        z-index: 100;
+    }
+
+    .nav-btn {
+        width: 100px;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    .nav-btn.active {
+        color: white;
+    }
+
+    .nav-icon {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 3px;
+    }
+
+    /* MODAL */
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 200;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-box {
+        width: 100%;
+        max-width: 430px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 24px;
+    }
+
+    .modal-box h2 {
+        margin-bottom: 8px;
+    }
+
+    .modal-box p {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    /* EDIT PROFIL (FORM) */
+
+    .profile-modal-box {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .field {
+        margin-bottom: 14px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        margin-bottom: 7px;
+    }
+
+    .field input,
+    .field textarea {
+        width: 100%;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 12px 14px;
+        border-radius: 10px;
+        outline: none;
+    }
+
+    .field textarea {
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+        border-color: #454c57;
+    }
+
+    .field input:disabled,
+    .field textarea:disabled {
+        opacity: 0.6;
+    }
+
+    .field-hint {
+        color: var(--muted);
+        font-size: 11px;
+        margin-top: 5px;
+    }
+
+    .form-error {
+        display: none;
+        color: var(--danger);
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 14px;
+    }
+
+    .form-error.show {
+        display: block;
+    }
+
+    /* TOAST */
+
+    .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 84px;
+        transform: translateX(-50%);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 13px;
+        max-width: calc(100% - 40px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 400;
+    }
+
+    .toast.show {
+        opacity: 1;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+        .cards {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .navbar {
+            padding: 0 15px;
+        }
+
+        .points {
+            display: none;
+        }
+
+        .app {
+            padding: 25px 15px 95px;
+        }
+
+        .page-header h1 {
+            font-size: 25px;
+        }
+
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .offer {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .stats {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .nav-btn {
+            width: 75px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- AUTH LOADING -->
+
+<div id="authLoading">Memuat...</div>
 
 
-        <!-- PROFILE -->
+<!-- NAVBAR -->
 
-        <section id="profile" class="page">
+<nav class="navbar">
 
-            <div class="page-header">
+    <div class="logo">
+        SkillSwap <span>/</span>
+    </div>
 
-                <h1>Profil</h1>
+    <div class="nav-right">
 
-                <p>
-                    Kelola identitas dan skill kamu.
-                </p>
+        <div class="points">
+            ✦ 120 Skill Points
+        </div>
 
-            </div>
+        <div id="navAvatar" class="avatar" onclick="logout()">
+            …
+        </div>
 
-            <div class="profile">
+    </div>
 
-                <div class="profile-head">
+</nav>
 
-                    <div class="profile-avatar">
-                        GU
-                    </div>
+
+<!-- APP -->
+
+<main class="app">
+
+
+    <!-- DISCOVER -->
+
+    <section id="discover" class="page active">
+
+        <div class="page-header">
+            <h1>Temukan Skill</h1>
+            <p>Temukan orang yang bisa mengajarkan skill yang kamu butuhkan.</p>
+        </div>
+
+        <input
+            id="searchInput"
+            class="search"
+            type="text"
+            placeholder="Cari skill, misalnya Video Editing..."
+            oninput="searchUsers()"
+        >
+
+        <div id="userCards" class="cards">
+
+            <div class="user-card" data-search="video editing photoshop">
+
+                <div class="user-top">
+                    <div class="big-avatar">AR</div>
 
                     <div>
-
-                        <h2>Gue</h2>
-
-                        <p>
-                            Skill Swapper sejak 2026
-                        </p>
-
+                        <div class="user-name">Ardi</div>
+                        <div class="verified">✓ Terverifikasi</div>
                     </div>
-
                 </div>
-                <button onclick="editProfile()">Edit Profil</button>
-
-
-                <div class="stats">
-
-                    <div class="stat">
-                        <strong>12</strong>
-                        <span>Swap</span>
-                    </div>
-
-                    <div class="stat">
-                        <strong>8</strong>
-                        <span>Match</span>
-                    </div>
-
-                    <div class="stat">
-                        <strong>4.9</strong>
-                        <span>Rating</span>
-                    </div>
-
-                </div>
-
 
                 <div class="skill-section">
+                    <div class="label">Dia menawarkan</div>
 
-                    <div class="label">
-                        Skill yang kamu tawarkan
-                    </div>
-
-                    <span class="skill">
-                        Video Editing
-                    </span>
-
-                    <span class="skill">
-                        CapCut
-                    </span>
-
+                    <span class="skill">Video Editing</span>
+                    <span class="skill">CapCut</span>
                 </div>
 
-
                 <div class="skill-section">
+                    <div class="label">Dia membutuhkan</div>
 
-                    <div class="label">
-                        Skill yang kamu cari
-                    </div>
+                    <span class="skill need">Photoshop</span>
+                </div>
 
-                    <span class="skill need">
-                        Coding
-                    </span>
+                <div class="card-actions">
 
-                    <span class="skill need">
-                        UI Design
-                    </span>
+                    <button class="btn" onclick="skipUser('Ardi')">
+                        Lewati
+                    </button>
+
+                    <button class="btn primary" onclick="requestSwap('Ardi')">
+                        ↔ Swap
+                    </button>
 
                 </div>
 
             </div>
 
-        </section>
 
-    </main>
+            <div class="user-card" data-search="coding javascript website">
 
+                <div class="user-top">
+                    <div class="big-avatar">DN</div>
 
-    <!-- =========================
-         BOTTOM NAV
-    ========================== -->
+                    <div>
+                        <div class="user-name">Dina</div>
+                        <div class="verified">✓ Terverifikasi</div>
+                    </div>
+                </div>
 
-    <nav class="bottom-nav">
+                <div class="skill-section">
+                    <div class="label">Dia menawarkan</div>
 
-        <button
-            class="nav-btn active"
-            onclick="showPage('discover', this)"
-        >
-            <span class="nav-icon">⌕</span>
-            Temukan
-        </button>
+                    <span class="skill">Coding</span>
+                    <span class="skill">JavaScript</span>
+                </div>
 
-        <button
-            class="nav-btn"
-            onclick="showPage('offers', this)"
-        >
-            <span class="nav-icon">⇄</span>
-            Penawaran
-        </button>
+                <div class="skill-section">
+                    <div class="label">Dia membutuhkan</div>
 
-        <button
-            class="nav-btn"
-            onclick="showPage('matches', this)"
-        >
-            <span class="nav-icon">♡</span>
-            Match
-        </button>
+                    <span class="skill need">UI Design</span>
+                </div>
 
-        <button
-            class="nav-btn"
-            onclick="showPage('profile', this)"
-        >
-            <span class="nav-icon">○</span>
-            Profil
-        </button>
+                <div class="card-actions">
 
-    </nav>
+                    <button class="btn" onclick="skipUser('Dina')">
+                        Lewati
+                    </button>
+
+                    <button class="btn primary" onclick="requestSwap('Dina')">
+                        ↔ Swap
+                    </button>
+
+                </div>
+
+            </div>
 
 
-    <!-- =========================
-         MODAL
-    ========================== -->
+            <div class="user-card" data-search="design ui figma">
 
-    <div id="modal" class="modal">
+                <div class="user-top">
+                    <div class="big-avatar">RF</div>
 
-        <div class="modal-box">
+                    <div>
+                        <div class="user-name">Rafi</div>
+                        <div class="verified">✓ Terverifikasi</div>
+                    </div>
+                </div>
 
-            <h2 id="modalTitle">
-                Skill Swap
-            </h2>
+                <div class="skill-section">
+                    <div class="label">Dia menawarkan</div>
 
-            <p id="modalText">
-                ...
-            </p>
+                    <span class="skill">UI Design</span>
+                    <span class="skill">Figma</span>
+                </div>
 
-            <div class="modal-actions">
+                <div class="skill-section">
+                    <div class="label">Dia membutuhkan</div>
 
-                <button
-                    class="btn"
-                    onclick="closeModal()"
-                    style="flex:1;"
-                >
-                    Batal
-                </button>
+                    <span class="skill need">Video Editing</span>
+                </div>
 
-                <button
-                    class="btn primary"
-                    onclick="confirmAction()"
-                    style="flex:1;"
-                >
-                    Lanjut
-                </button>
+                <div class="card-actions">
+
+                    <button class="btn" onclick="skipUser('Rafi')">
+                        Lewati
+                    </button>
+
+                    <button class="btn primary" onclick="requestSwap('Rafi')">
+                        ↔ Swap
+                    </button>
+
+                </div>
 
             </div>
 
         </div>
 
-    </div><!-- =========================
-     MODAL EDIT PROFIL
-========================== -->
+    </section>
 
-<div id="profileModal" class="modal">
 
-    <div class="modal-box">
+    <!-- OFFERS -->
 
-        <h2>Edit Profil</h2>
+    <section id="offers" class="page">
 
-        <p>
-            Atur informasi profil kamu.
-        </p>
+        <div class="page-header">
+            <h1>Penawaran</h1>
+            <p>Kelola permintaan Skill Swap kamu.</p>
+        </div>
 
-        <input
-            id="profileUsername"
-            class="search"
-            type="text"
-            placeholder="Username"
-        >
+        <div class="offer-list">
 
-        <input
-            id="profileDisplayName"
-            class="search"
-            type="text"
-            placeholder="Nama tampilan"
-        >
+            <div class="offer">
 
-        <input
-            id="profileBio"
-            class="search"
-            type="text"
-            placeholder="Bio"
-        >
+                <div class="offer-info">
+                    <h3>Dina ingin bertukar skill denganmu</h3>
+                    <p>Kamu: Video Editing → Dina: JavaScript</p>
+                </div>
 
-        <input
-            id="profileAvatar"
-            class="search"
-            type="text"
-            placeholder="URL foto profil"
-        >
+                <div class="status">Menunggu</div>
 
-        <input
-            id="profileCountry"
-            class="search"
-            type="text"
-            placeholder="Negara"
-        >
+            </div>
 
-        <div class="modal-actions">
 
-            <button
-                class="btn"
-                onclick="closeProfileModal()"
-                style="flex:1;"
-            >
-                Batal
-            </button>
+            <div class="offer">
+
+                <div class="offer-info">
+                    <h3>Rafi menerima Skill Swap</h3>
+                    <p>UI Design ↔ Video Editing</p>
+                </div>
+
+                <div class="status">Match</div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- MATCH -->
+
+    <section id="matches" class="page">
+
+        <div class="page-header">
+            <h1>Match</h1>
+            <p>Partner Skill Swap yang cocok denganmu.</p>
+        </div>
+
+        <div class="match-box">
+
+            <div class="match-user">
+
+                <div class="big-avatar">RF</div>
+
+                <div>
+                    <strong>Rafi</strong>
+                    <p style="color:var(--muted);font-size:12px;">
+                        UI Designer
+                    </p>
+                </div>
+
+                <div class="match-score">92%</div>
+
+            </div>
+
+            <div class="match-line"></div>
+
+            <p style="color:var(--muted);font-size:13px;">
+                Kamu menawarkan
+                <strong style="color:white;">Video Editing</strong>
+                dan Rafi membutuhkan skill tersebut.
+            </p>
+
+            <br>
 
             <button
                 class="btn primary"
-                onclick="saveProfile()"
-                style="flex:1;"
+                style="width:100%;"
+                onclick="openChat('Rafi')"
             >
+                Buka Chat
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- PROFILE -->
+
+    <section id="profile" class="page">
+
+        <div class="page-header">
+            <h1>Profil</h1>
+            <p>Kelola identitas dan skill kamu.</p>
+        </div>
+
+        <div class="profile">
+
+            <div class="profile-head">
+
+                <div id="profileAvatarBox" class="profile-avatar">
+                    …
+                </div>
+
+                <div>
+                    <h2 id="profileNameText">Memuat profil...</h2>
+                    <p id="profileSubText">&nbsp;</p>
+                </div>
+
+            </div>
+
+            <p id="profileBioText" class="profile-bio"></p>
+
+            <button class="btn" style="margin-bottom:25px;" onclick="editProfile()">Edit Profil</button>
+
+
+            <div class="stats">
+
+                <div class="stat">
+                    <strong>12</strong>
+                    <span>Swap</span>
+                </div>
+
+                <div class="stat">
+                    <strong>8</strong>
+                    <span>Match</span>
+                </div>
+
+                <div class="stat">
+                    <strong>4.9</strong>
+                    <span>Rating</span>
+                </div>
+
+            </div>
+
+
+            <div class="skill-section">
+
+                <div class="label">Skill yang kamu tawarkan</div>
+
+                <span class="skill">Video Editing</span>
+                <span class="skill">CapCut</span>
+
+            </div>
+
+
+            <div class="skill-section">
+
+                <div class="label">Skill yang kamu cari</div>
+
+                <span class="skill need">Coding</span>
+                <span class="skill need">UI Design</span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav">
+
+    <button class="nav-btn active" onclick="showPage('discover', this)">
+        <span class="nav-icon">⌕</span>
+        Temukan
+    </button>
+
+    <button class="nav-btn" onclick="showPage('offers', this)">
+        <span class="nav-icon">⇄</span>
+        Penawaran
+    </button>
+
+    <button class="nav-btn" onclick="showPage('matches', this)">
+        <span class="nav-icon">♡</span>
+        Match
+    </button>
+
+    <button class="nav-btn" onclick="showPage('profile', this)">
+        <span class="nav-icon">○</span>
+        Profil
+    </button>
+
+</nav>
+
+
+<!-- MODAL SKILL SWAP -->
+
+<div id="modal" class="modal">
+
+    <div class="modal-box">
+
+        <h2 id="modalTitle">Skill Swap</h2>
+
+        <p id="modalText">...</p>
+
+        <div class="modal-actions">
+
+            <button class="btn" onclick="closeModal()" style="flex:1;">
+                Batal
+            </button>
+
+            <button class="btn primary" onclick="confirmAction()" style="flex:1;">
+                Lanjut
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MODAL EDIT PROFIL -->
+
+<div id="profileModal" class="modal">
+
+    <div class="modal-box profile-modal-box">
+
+        <h2>Edit Profil</h2>
+
+        <p>Perbarui identitas yang tampil di profil kamu.</p>
+
+        <div class="field">
+            <label for="profileUsername">Username</label>
+            <input
+                id="profileUsername"
+                type="text"
+                maxlength="30"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                placeholder="contoh: ardi_01"
+            >
+            <div class="field-hint">3–30 karakter: huruf kecil, angka, _ atau titik.</div>
+        </div>
+
+        <div class="field">
+            <label for="profileDisplayName">Nama tampilan</label>
+            <input
+                id="profileDisplayName"
+                type="text"
+                maxlength="50"
+                autocomplete="off"
+                placeholder="Nama yang dilihat orang lain"
+            >
+        </div>
+
+        <div class="field">
+            <label for="profileBio">Bio</label>
+            <textarea
+                id="profileBio"
+                maxlength="300"
+                placeholder="Ceritakan singkat tentang kamu"
+            ></textarea>
+            <div class="field-hint">Maksimal 300 karakter.</div>
+        </div>
+
+        <div class="field">
+            <label for="profileAvatar">URL foto profil</label>
+            <input
+                id="profileAvatar"
+                type="url"
+                maxlength="500"
+                autocomplete="off"
+                autocapitalize="none"
+                placeholder="https://..."
+            >
+            <div class="field-hint">Opsional. Harus diawali https://</div>
+        </div>
+
+        <div class="field">
+            <label for="profileCountry">Negara</label>
+            <input
+                id="profileCountry"
+                type="text"
+                maxlength="60"
+                autocomplete="country-name"
+                placeholder="Indonesia"
+            >
+        </div>
+
+        <div id="profileError" class="form-error" role="alert"></div>
+
+        <div class="modal-actions">
+
+            <button id="profileCancelBtn" class="btn" onclick="closeProfileModal()" style="flex:1;">
+                Batal
+            </button>
+
+            <button id="profileSaveBtn" class="btn primary" onclick="saveProfile()" style="flex:1;">
                 Simpan
             </button>
 
@@ -257,208 +1083,683 @@ k="openChat('Rafi')"
 </div>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js"></script>
+<!-- TOAST -->
 
-    <script>
+<div id="toast" class="toast" role="status"></div>
 
-        /* =========================
-           AUTH GUARD
-        ========================== */
 
-        let currentUser = null;
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
 
-        (async function checkAuth() {
+<script>
 
-            const { data: { session } } = await sb.auth.getSession();
+    /* STATE */
 
-            if (!session) {
-                window.location.href = "login.html";
+    let currentUser = null;
+    let currentProfile = null;
+    let selectedUser = "";
+    let profileBusy = false;
+
+
+    /* AUTH GUARD */
+
+    (async function checkAuth() {
+
+        const { data: { session } } = await sb.auth.getSession();
+
+        if (!session) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        currentUser = session.user;
+
+        document.getElementById("authLoading").style.display = "none";
+
+        loadProfile();
+
+    })();
+
+
+    function logout() {
+
+        sb.auth.signOut().then(function() {
+            window.location.href = "login.html";
+        });
+
+    }
+
+
+    /* TOAST */
+
+    let toastTimer = null;
+
+    function showToast(message) {
+
+        const toast = document.getElementById("toast");
+
+        toast.textContent = message;
+        toast.classList.add("show");
+
+        clearTimeout(toastTimer);
+
+        toastTimer = setTimeout(function() {
+            toast.classList.remove("show");
+        }, 2800);
+
+    }
+
+
+    /* PROFILE — HELPER */
+
+    function getInitials(name) {
+
+        const words = String(name || "")
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+
+        if (words.length === 0) {
+            return "?";
+        }
+
+        if (words.length === 1) {
+            return words[0].slice(0, 2).toUpperCase();
+        }
+
+        return (words[0][0] + words[1][0]).toUpperCase();
+
+    }
+
+
+    function setAvatar(element, url, initials) {
+
+        element.style.backgroundImage = "";
+        element.textContent = initials;
+
+        if (!url || !/^https:\/\//i.test(url)) {
+            return;
+        }
+
+        const img = new Image();
+
+        img.onload = function() {
+
+            if (!currentProfile || currentProfile.avatar_url !== url) {
                 return;
             }
 
-            currentUser = session.user;
+            element.style.backgroundImage =
+                'url("' + url.replace(/"/g, "%22") + '")';
+            element.style.backgroundSize = "cover";
+            element.style.backgroundPosition = "center";
+            element.textContent = "";
 
-            document.getElementById("authLoading").style.display = "none";
+        };
 
-        })();
+        img.src = url;
 
-
-        function logout() {
-
-            sb.auth.signOut().then(function() {
-                window.location.href = "login.html";
-            });
-
-        }
-function editProfile() {
-    document.getElementById("profileModal").classList.add("show");
-}
+    }
 
 
-        let selectedUser = "";
+    function renderProfile(profile) {
 
-        /* =========================
-           PAGE NAVIGATION
-        ========================== */
+        const fallbackName =
+            (currentUser && currentUser.email)
+                ? currentUser.email.split("@")[0]
+                : "Pengguna";
 
-        function showPage(pageId, button) {
+        const name =
+            profile.display_name ||
+            profile.username ||
+            fallbackName;
 
-            const pages =
-                document.querySelectorAll(".page");
+        const initials = getInitials(name);
 
-            pages.forEach(page => {
-                page.classList.remove("active");
-            });
+        document.getElementById("profileNameText").textContent = name;
 
-            document
-                .getElementById(pageId)
-                .classList.add("active");
+        const parts = [];
 
-
-            const buttons =
-                document.querySelectorAll(".nav-btn");
-
-            buttons.forEach(btn => {
-                btn.classList.remove("active");
-            });
-
-            button.classList.add("active");
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
+        if (profile.username) {
+            parts.push("@" + profile.username);
         }
 
+        if (profile.country) {
+            parts.push(profile.country);
+        }
 
-        /* =========================
-           SEARCH
-        ========================== */
+        if (profile.created_at) {
+            const year = new Date(profile.created_at).getFullYear();
+            if (!isNaN(year)) {
+                parts.push("Skill Swapper sejak " + year);
+            }
+        }
 
-        function searchUsers() {
+        document.getElementById("profileSubText").textContent =
+            parts.length ? parts.join(" · ") : "Skill Swapper";
 
-            const query =
-                document
-                .getElementById("searchInput")
-                .value
-                .toLowerCase()
-                .trim();
+        const bioEl = document.getElementById("profileBioText");
 
-            const cards =
-                document.querySelectorAll(".user-card");
+        if (profile.bio) {
+            bioEl.textContent = profile.bio;
+            bioEl.classList.add("show");
+        } else {
+            bioEl.textContent = "";
+            bioEl.classList.remove("show");
+        }
 
-            cards.forEach(card => {
+        setAvatar(
+            document.getElementById("profileAvatarBox"),
+            profile.avatar_url,
+            initials
+        );
 
-                const data =
-                    card.dataset.search;
+        setAvatar(
+            document.getElementById("navAvatar"),
+            profile.avatar_url,
+            initials
+        );
 
-                if (data.includes(query)) {
+    }
 
-                    card.style.display = "";
 
-                } else {
+    /* PROFILE — BACA DARI SUPABASE */
 
-                    card.style.display = "none";
+    async function fetchProfile() {
 
+        return await sb
+            .from("profiles")
+            .select("id, username, display_name, bio, avatar_url, country, created_at, updated_at")
+            .eq("id", currentUser.id)
+            .maybeSingle();
+
+    }
+
+
+    async function loadProfile() {
+
+        try {
+
+            const { data, error } = await fetchProfile();
+
+            if (error) {
+                console.error("Gagal memuat profil:", error);
+                document.getElementById("profileNameText").textContent = "Profil";
+                document.getElementById("profileSubText").textContent =
+                    "Gagal memuat profil. Coba muat ulang halaman.";
+                return;
+            }
+
+            if (!data) {
+                document.getElementById("profileNameText").textContent = "Profil";
+                document.getElementById("profileSubText").textContent =
+                    "Data profil belum ditemukan.";
+                return;
+            }
+
+            currentProfile = data;
+            renderProfile(data);
+
+        } catch (err) {
+
+            console.error("Error loadProfile:", err);
+            document.getElementById("profileSubText").textContent =
+                "Terjadi kesalahan saat memuat profil.";
+
+        }
+
+    }
+
+
+    /* PROFILE — MODAL EDIT */
+
+    const PROFILE_FIELDS = [
+        "profileUsername",
+        "profileDisplayName",
+        "profileBio",
+        "profileAvatar",
+        "profileCountry"
+    ];
+
+
+    function showProfileError(message) {
+
+        const box = document.getElementById("profileError");
+
+        box.textContent = message;
+        box.classList.add("show");
+
+    }
+
+
+    function clearProfileError() {
+
+        const box = document.getElementById("profileError");
+
+        box.textContent = "";
+        box.classList.remove("show");
+
+    }
+
+
+    function setProfileFormBusy(busy) {
+
+        profileBusy = busy;
+
+        PROFILE_FIELDS.forEach(function(id) {
+            document.getElementById(id).disabled = busy;
+        });
+
+        document.getElementById("profileSaveBtn").disabled = busy;
+        document.getElementById("profileCancelBtn").disabled = busy;
+
+    }
+
+
+    function fillProfileForm(profile) {
+
+        document.getElementById("profileUsername").value = profile.username || "";
+        document.getElementById("profileDisplayName").value = profile.display_name || "";
+        document.getElementById("profileBio").value = profile.bio || "";
+        document.getElementById("profileAvatar").value = profile.avatar_url || "";
+        document.getElementById("profileCountry").value = profile.country || "";
+
+    }
+
+
+    async function editProfile() {
+
+        if (!currentUser) {
+            showToast("Sesi belum siap. Coba lagi sebentar.");
+            return;
+        }
+
+        clearProfileError();
+        setProfileFormBusy(true);
+
+        document.getElementById("profileModal").classList.add("show");
+
+        try {
+
+            const { data, error } = await fetchProfile();
+
+            if (error) {
+                console.error("Gagal memuat profil:", error);
+                showProfileError("Gagal memuat data profil. Tutup lalu coba lagi.");
+                document.getElementById("profileCancelBtn").disabled = false;
+                profileBusy = false;
+                return;
+            }
+
+            if (!data) {
+                showProfileError("Data profil belum ditemukan di database, jadi belum bisa diedit.");
+                document.getElementById("profileCancelBtn").disabled = false;
+                profileBusy = false;
+                return;
+            }
+
+            currentProfile = data;
+            fillProfileForm(data);
+            setProfileFormBusy(false);
+
+        } catch (err) {
+
+            console.error("Error editProfile:", err);
+            showProfileError("Terjadi kesalahan. Tutup lalu coba lagi.");
+            document.getElementById("profileCancelBtn").disabled = false;
+            profileBusy = false;
+
+        }
+
+    }
+
+
+    function closeProfileModal() {
+
+        if (profileBusy) {
+            return;
+        }
+
+        document.getElementById("profileModal").classList.remove("show");
+        clearProfileError();
+
+    }
+
+
+    /* PROFILE — SIMPAN KE SUPABASE */
+
+    function readProfileForm() {
+
+        const username = document
+            .getElementById("profileUsername")
+            .value.trim().toLowerCase();
+
+        const displayName = document
+            .getElementById("profileDisplayName")
+            .value.trim();
+
+        const bio = document
+            .getElementById("profileBio")
+            .value.trim();
+
+        const avatar = document
+            .getElementById("profileAvatar")
+            .value.trim();
+
+        const country = document
+            .getElementById("profileCountry")
+            .value.trim();
+
+        if (!/^[a-z0-9_.]{3,30}$/.test(username)) {
+            return { error: "Username harus 3–30 karakter: huruf kecil, angka, _ atau titik (tanpa spasi)." };
+        }
+
+        if (displayName.length > 50) {
+            return { error: "Nama tampilan maksimal 50 karakter." };
+        }
+
+        if (bio.length > 300) {
+            return { error: "Bio maksimal 300 karakter." };
+        }
+
+        if (avatar && (!/^https:\/\/\S+$/i.test(avatar) || avatar.length > 500)) {
+            return { error: "URL foto profil harus diawali https:// dan tidak boleh mengandung spasi." };
+        }
+
+        if (country.length > 60) {
+            return { error: "Nama negara maksimal 60 karakter." };
+        }
+
+        return {
+            values: {
+                username: username,
+                display_name: displayName || null,
+                bio: bio || null,
+                avatar_url: avatar || null,
+                country: country || null
+            }
+        };
+
+    }
+
+
+    async function saveProfile() {
+
+        if (profileBusy) {
+            return;
+        }
+
+        if (!currentUser) {
+            showProfileError("Sesi login tidak ditemukan. Silakan login ulang.");
+            return;
+        }
+
+        clearProfileError();
+
+        const form = readProfileForm();
+
+        if (form.error) {
+            showProfileError(form.error);
+            return;
+        }
+
+        const values = form.values;
+
+        setProfileFormBusy(true);
+        document.getElementById("profileSaveBtn").textContent = "Menyimpan...";
+
+        try {
+
+            if (!currentProfile || values.username !== currentProfile.username) {
+
+                const check = await sb
+                    .from("profiles")
+                    .select("id")
+                    .eq("username", values.username)
+                    .neq("id", currentUser.id)
+                    .limit(1);
+
+                if (!check.error && check.data && check.data.length > 0) {
+                    showProfileError('Username "' + values.username + '" sudah dipakai orang lain. Coba username lain.');
+                    return;
                 }
 
-            });
+            }
+
+            const payload = {
+                username: values.username,
+                display_name: values.display_name,
+                bio: values.bio,
+                avatar_url: values.avatar_url,
+                country: values.country,
+                updated_at: new Date().toISOString()
+            };
+
+            const { data, error } = await sb
+                .from("profiles")
+                .update(payload)
+                .eq("id", currentUser.id)
+                .select()
+                .maybeSingle();
+
+            if (error) {
+
+                console.error("Gagal menyimpan profil:", error);
+
+                const msg = String(error.message || "").toLowerCase();
+
+                if (error.code === "23505" || msg.includes("duplicate") || msg.includes("unique")) {
+                    showProfileError('Username "' + values.username + '" sudah dipakai orang lain. Coba username lain.');
+                } else {
+                    showProfileError("Gagal menyimpan profil: " + (error.message || "kesalahan tidak diketahui"));
+                }
+
+                return;
+
+            }
+
+            if (!data) {
+                showProfileError("Profil tidak tersimpan. Data profil tidak ditemukan atau tidak ada izin update.");
+                return;
+            }
+
+            currentProfile = data;
+            renderProfile(data);
+
+            profileBusy = false;
+            document.getElementById("profileModal").classList.remove("show");
+
+            showToast("Profil berhasil disimpan ✓");
+
+        } catch (err) {
+
+            console.error("Error saveProfile:", err);
+            showProfileError("Terjadi kesalahan jaringan. Coba lagi.");
+
+        } finally {
+
+            document.getElementById("profileSaveBtn").textContent = "Simpan";
+            setProfileFormBusy(false);
 
         }
 
+    }
 
-        /* =========================
-           SWAP
-        ========================== */
 
-        function requestSwap(user) {
+    /* PAGE NAVIGATION */
 
-            selectedUser = user;
+    function showPage(pageId, button) {
 
+        const pages =
+            document.querySelectorAll(".page");
+
+        pages.forEach(page => {
+            page.classList.remove("active");
+        });
+
+        document
+            .getElementById(pageId)
+            .classList.add("active");
+
+
+        const buttons =
+            document.querySelectorAll(".nav-btn");
+
+        buttons.forEach(btn => {
+            btn.classList.remove("active");
+        });
+
+        button.classList.add("active");
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+
+    /* SEARCH */
+
+    function searchUsers() {
+
+        const query =
             document
-                .getElementById("modalTitle")
-                .textContent =
-                "Kirim Skill Swap";
+            .getElementById("searchInput")
+            .value
+            .toLowerCase()
+            .trim();
 
-            document
-                .getElementById("modalText")
-                .textContent =
-                "Kamu ingin mengirim permintaan Skill Swap kepada " +
-                user +
-                ". Pada versi berikutnya, permintaan ini akan tersimpan di database.";
+        const cards =
+            document.querySelectorAll(".user-card");
 
-            document
-                .getElementById("modal")
-                .classList.add("show");
-        }
+        cards.forEach(card => {
 
+            const data =
+                card.dataset.search;
 
-        function confirmAction() {
+            if (data.includes(query)) {
 
-            alert(
-                "Permintaan Skill Swap untuk " +
-                selectedUser +
-                " berhasil dibuat (demo)."
-            );
+                card.style.display = "";
 
-            closeModal();
-        }
+            } else {
 
+                card.style.display = "none";
 
-        /* =========================
-           SKIP
-        ========================== */
+            }
 
-        function skipUser(user) {
+        });
 
-            alert(
-                user +
-                " dilewati. Sistem akan menampilkan rekomendasi berikutnya."
-            );
-
-        }
+    }
 
 
-        /* =========================
-           CHAT
-        ========================== */
+    /* SWAP */
 
-        function openChat(user) {
+    function requestSwap(user) {
 
-            alert(
-                "Chat dengan " +
-                user +
-                " akan tersedia setelah sistem chat dan database dibuat."
-            );
+        selectedUser = user;
 
-        }
+        document
+            .getElementById("modalTitle")
+            .textContent =
+            "Kirim Skill Swap";
 
-
-        /* =========================
-           MODAL
-        ========================== */
-
-        function closeModal() {
-
-            document
-                .getElementById("modal")
-                .classList.remove("show");
-
-        }
-
+        document
+            .getElementById("modalText")
+            .textContent =
+            "Kamu ingin mengirim permintaan Skill Swap kepada " +
+            user +
+            ". Pada versi berikutnya, permintaan ini akan tersimpan di database.";
 
         document
             .getElementById("modal")
-            .addEventListener("click", function(event) {
+            .classList.add("show");
+    }
 
-                if (event.target === this) {
-                    closeModal();
-                }
 
-            });
+    function confirmAction() {
 
-    </script>
+        alert(
+            "Permintaan Skill Swap untuk " +
+            selectedUser +
+            " berhasil dibuat (demo)."
+        );
+
+        closeModal();
+    }
+
+
+    /* SKIP */
+
+    function skipUser(user) {
+
+        alert(
+            user +
+            " dilewati. Sistem akan menampilkan rekomendasi berikutnya."
+        );
+
+    }
+
+
+    /* CHAT */
+
+    function openChat(user) {
+
+        alert(
+            "Chat dengan " +
+            user +
+            " akan tersedia setelah sistem chat dan database dibuat."
+        );
+
+    }
+
+
+    /* MODAL */
+
+    function closeModal() {
+
+        document
+            .getElementById("modal")
+            .classList.remove("show");
+
+    }
+
+
+    document
+        .getElementById("modal")
+        .addEventListener("click", function(event) {
+
+            if (event.target === this) {
+                closeModal();
+            }
+
+        });
+
+
+    // Klik di luar kotak Edit Profil = tutup (diabaikan saat sedang menyimpan)
+    document
+        .getElementById("profileModal")
+        .addEventListener("click", function(event) {
+
+            if (event.target === this) {
+                closeProfileModal();
+            }
+
+        });
+
+
+    // Tombol Esc menutup modal yang sedang terbuka
+    document.addEventListener("keydown", function(event) {
+
+        if (event.key !== "Escape") {
+            return;
+        }
+
+        closeProfileModal();
+        closeModal();
+
+    });
+
+</script>
 
 </body>
 </html>
