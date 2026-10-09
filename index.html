@@ -1349,6 +1349,133 @@
 
     }
 
+    /* SKILL — BACA, TAMBAH, HAPUS */
+
+    async function loadSkills() {
+        if (!currentUser) return;
+
+        const { data, error } = await sb
+            .from("user_skills")
+            .select("id, skill_name, skill_type")
+            .eq("user_id", currentUser.id)
+            .order("created_at", { ascending: true });
+
+        if (error) {
+            console.error("Gagal memuat skill:", error);
+            showToast("Gagal memuat skill. Coba muat ulang.");
+            return;
+        }
+
+        renderSkills(data || []);
+    }
+
+    function renderSkills(skills) {
+        const offered = document.getElementById("offeredSkills");
+        const wanted = document.getElementById("wantedSkills");
+
+        offered.replaceChildren();
+        wanted.replaceChildren();
+
+        function addSkillTag(container, skill) {
+            const tag = document.createElement("span");
+            tag.className = "skill" +
+                (skill.skill_type === "wanted" ? " need" : "");
+
+            const name = document.createElement("span");
+            name.textContent = skill.skill_name;
+            tag.appendChild(name);
+
+            const del = document.createElement("button");
+            del.type = "button";
+            del.textContent = " ×";
+            del.setAttribute("aria-label", "Hapus " + skill.skill_name);
+            del.style.cssText =
+                "background:none;border:0;color:inherit;margin-left:5px;cursor:pointer;";
+            del.onclick = () => deleteSkill(skill.id);
+
+            tag.appendChild(del);
+            container.appendChild(tag);
+        }
+
+        const offeredList = skills.filter(s => s.skill_type === "offered");
+        const wantedList = skills.filter(s => s.skill_type === "wanted");
+
+        if (!offeredList.length) {
+            offered.textContent = "Belum ada skill yang ditawarkan.";
+        } else {
+            offeredList.forEach(s => addSkillTag(offered, s));
+        }
+
+        if (!wantedList.length) {
+            wanted.textContent = "Belum ada skill yang dicari.";
+        } else {
+            wantedList.forEach(s => addSkillTag(wanted, s));
+        }
+    }
+
+    async function addSkill(type) {
+        if (!currentUser) {
+            showToast("Silakan login ulang.");
+            return;
+        }
+
+        if (type !== "offered" && type !== "wanted") return;
+
+        const input = document.getElementById(
+            type === "offered" ? "newOfferedSkill" : "newWantedSkill"
+        );
+
+        const skillName = input.value.trim();
+
+        if (!skillName) {
+            showToast("Isi nama skill terlebih dahulu.");
+            input.focus();
+            return;
+        }
+
+        const { error } = await sb
+            .from("user_skills")
+            .insert({
+                user_id: currentUser.id,
+                skill_name: skillName,
+                skill_type: type
+            });
+
+        if (error) {
+            console.error("Gagal menambah skill:", error);
+
+            if (error.code === "23505") {
+                showToast("Skill itu sudah ada di daftar.");
+            } else {
+                showToast("Skill gagal ditambahkan. Coba lagi.");
+            }
+            return;
+        }
+
+        input.value = "";
+        await loadSkills();
+        showToast("Skill berhasil ditambahkan ✓");
+    }
+
+    async function deleteSkill(id) {
+        if (!currentUser) return;
+
+        const { error } = await sb
+            .from("user_skills")
+            .delete()
+            .eq("id", id)
+            .eq("user_id", currentUser.id);
+
+        if (error) {
+            console.error("Gagal menghapus skill:", error);
+            showToast("Skill gagal dihapus.");
+            return;
+        }
+
+        await loadSkills();
+        showToast("Skill berhasil dihapus.");
+    }
+
 
     /* PROFILE — MODAL EDIT */
 
