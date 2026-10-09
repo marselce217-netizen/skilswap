@@ -917,12 +917,55 @@
 
             <div class="skill-section">
 
-                <div class="label">Skill yang kamu tawarkan</div>
+                
+<!-- SKILL YANG DITAWARKAN -->
+<div class="skill-section">
+    <div class="label">Skill yang kamu tawarkan</div>
 
-                <span class="skill">Video Editing</span>
-                <span class="skill">CapCut</span>
+    <div id="offeredSkills">
+        <p style="color:var(--muted);font-size:13px;">
+            Memuat skill...
+        </p>
+    </div>
 
-            </div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+        <input
+            id="newOfferedSkill"
+            type="text"
+            maxlength="60"
+            placeholder="Tambah skill yang kamu kuasai"
+            style="flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:white;padding:11px;border-radius:9px;"
+        >
+        <button class="btn primary" onclick="addSkill('offered')">
+            + Tambah
+        </button>
+    </div>
+</div>
+
+<!-- SKILL YANG DICARI -->
+<div class="skill-section" style="margin-top:22px;">
+    <div class="label">Skill yang kamu cari</div>
+
+    <div id="wantedSkills">
+        <p style="color:var(--muted);font-size:13px;">
+            Memuat skill...
+        </p>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:10px;">
+        <input
+            id="newWantedSkill"
+            type="text"
+            maxlength="60"
+            placeholder="Skill yang ingin kamu pelajari"
+            style="flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:white;padding:11px;border-radius:9px;"
+        >
+        <button class="btn primary" onclick="addSkill('wanted')">
+            + Tambah
+        </button>
+    </div>
+</div>
+                
 
 
             <div class="skill-section">
