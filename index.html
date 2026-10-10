@@ -2027,7 +2027,26 @@
 
     /* SWAP */
 
-    function requestSwap(user) {
+    function requestSwap(userId, userName) {
+
+    if (!userId || userId === currentUser.id) {
+        showToast("Akun penerima tidak valid.");
+        return;
+    }
+
+    selectedUserId = userId;
+    selectedUser = userName;
+
+    document.getElementById("modalTitle").textContent =
+        "Kirim Skill Swap";
+
+    document.getElementById("modalText").textContent =
+        "Kamu ingin mengirim permintaan Skill Swap kepada " +
+        userName +
+        "? Permintaan akan dikirim ke akun ini.";
+
+    document.getElementById("modal").classList.add("show");
+}
 
         selectedUser = user;
 
