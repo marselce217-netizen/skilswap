@@ -2048,16 +2048,51 @@
     }
 
 
-    function confirmAction() {
-
-        alert(
-            "Permintaan Skill Swap untuk " +
-            selectedUser +
-            " berhasil dibuat (demo)."
-        );
-
-        closeModal();
+    
+async function confirmAction() {
+    if (!currentUser || !selectedUserId) {
+        alert("Pengguna atau tujuan Swap belum ditemukan.");
+        return;
     }
+
+    const { data: existing, error: checkError } = await sb
+        .from("skill_swap_requests")
+        .select("id")
+        .eq("sender_id", currentUser.id)
+        .eq("receiver_id", selectedUserId)
+        .eq("status", "pending")
+        .limit(1);
+
+    if (checkError) {
+        console.error(checkError);
+        alert("Gagal memeriksa permintaan: " + checkError.message);
+        return;
+    }
+
+    if (existing && existing.length > 0) {
+        alert("Permintaan Swap ke pengguna ini masih menunggu.");
+        closeModal();
+        return;
+    }
+
+    const { error } = await sb
+        .from("skill_swap_requests")
+        .insert({
+            sender_id: currentUser.id,
+            receiver_id: selectedUserId,
+            status: "pending"
+        });
+
+    if (error) {
+        console.error(error);
+        alert("Permintaan Swap gagal: " + error.message);
+        return;
+    }
+
+    closeModal();
+    alert("Permintaan Skill Swap berhasil dikirim!");
+}
+
 
 
     /* SKIP */
