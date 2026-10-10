@@ -2048,28 +2048,7 @@
     document.getElementById("modal").classList.add("show");
 }
 
-        selectedUser = user;
-
-        document
-            .getElementById("modalTitle")
-            .textContent =
-            "Kirim Skill Swap";
-
-        document
-            .getElementById("modalText")
-            .textContent =
-            "Kamu ingin mengirim permintaan Skill Swap kepada " +
-            user +
-            ". Pada versi berikutnya, permintaan ini akan tersimpan di database.";
-
-        document
-            .getElementById("modal")
-            .classList.add("show");
-    }
-
-
-    
-async function confirmAction() {
+        
     if (!currentUser || !selectedUserId) {
         alert("Pengguna atau tujuan Swap belum ditemukan.");
         return;
