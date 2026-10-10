@@ -156,6 +156,18 @@
         border-color: #454c57;
     }
 
+    .discover-status {
+        display: none;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+        padding: 8px 0 24px;
+    }
+
+    .discover-status.show {
+        display: block;
+    }
+
     .cards {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -185,6 +197,7 @@
     .big-avatar {
         width: 48px;
         height: 48px;
+        flex-shrink: 0;
         border-radius: 50%;
         background: #303640;
         display: flex;
@@ -195,6 +208,31 @@
 
     .user-name {
         font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .user-meta {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+        overflow-wrap: anywhere;
+    }
+
+    .user-bio {
+        color: #d6dae0;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 16px;
+        overflow-wrap: anywhere;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .mini-empty {
+        color: var(--muted);
+        font-size: 13px;
     }
 
     .verified {
@@ -655,125 +693,13 @@
             oninput="searchUsers()"
         >
 
-        <div id="userCards" class="cards">
+        <div id="discoverStatus" class="discover-status show">Memuat pengguna...</div>
 
-            <div class="user-card" data-search="video editing photoshop">
-
-                <div class="user-top">
-                    <div class="big-avatar">AR</div>
-
-                    <div>
-                        <div class="user-name">Ardi</div>
-                        <div class="verified">✓ Terverifikasi</div>
-                    </div>
-                </div>
-
-                <div class="skill-section">
-                    <div class="label">Dia menawarkan</div>
-
-                    <span class="skill">Video Editing</span>
-                    <span class="skill">CapCut</span>
-                </div>
-
-                <div class="skill-section">
-                    <div class="label">Dia membutuhkan</div>
-
-                    <span class="skill need">Photoshop</span>
-                </div>
-
-                <div class="card-actions">
-
-                    <button class="btn" onclick="skipUser('Ardi')">
-                        Lewati
-                    </button>
-
-                    <button class="btn primary" onclick="requestSwap('Ardi')">
-                        ↔ Swap
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="user-card" data-search="coding javascript website">
-
-                <div class="user-top">
-                    <div class="big-avatar">DN</div>
-
-                    <div>
-                        <div class="user-name">Dina</div>
-                        <div class="verified">✓ Terverifikasi</div>
-                    </div>
-                </div>
-
-                <div class="skill-section">
-                    <div class="label">Dia menawarkan</div>
-
-                    <span class="skill">Coding</span>
-                    <span class="skill">JavaScript</span>
-                </div>
-
-                <div class="skill-section">
-                    <div class="label">Dia membutuhkan</div>
-
-                    <span class="skill need">UI Design</span>
-                </div>
-
-                <div class="card-actions">
-
-                    <button class="btn" onclick="skipUser('Dina')">
-                        Lewati
-                    </button>
-
-                    <button class="btn primary" onclick="requestSwap('Dina')">
-                        ↔ Swap
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="user-card" data-search="design ui figma">
-
-                <div class="user-top">
-                    <div class="big-avatar">RF</div>
-
-                    <div>
-                        <div class="user-name">Rafi</div>
-                        <div class="verified">✓ Terverifikasi</div>
-                    </div>
-                </div>
-
-                <div class="skill-section">
-                    <div class="label">Dia menawarkan</div>
-
-                    <span class="skill">UI Design</span>
-                    <span class="skill">Figma</span>
-                </div>
-
-                <div class="skill-section">
-                    <div class="label">Dia membutuhkan</div>
-
-                    <span class="skill need">Video Editing</span>
-                </div>
-
-                <div class="card-actions">
-
-                    <button class="btn" onclick="skipUser('Rafi')">
-                        Lewati
-                    </button>
-
-                    <button class="btn primary" onclick="requestSwap('Rafi')">
-                        ↔ Swap
-                    </button>
-
-                </div>
-
-            </div>
-
+        <div id="discoverNoResult" class="discover-status">
+            Tidak ada pengguna yang cocok dengan pencarianmu.
         </div>
+
+        <div id="userCards" class="cards"></div>
 
     </section>
 
@@ -915,9 +841,6 @@
             </div>
 
 
-            
-
-                
 <!-- SKILL YANG DITAWARKAN -->
 <div class="skill-section">
     <div class="label">Skill yang kamu tawarkan</div>
@@ -965,12 +888,6 @@
         </button>
     </div>
 </div>
-                
-
-
-            
-
-            
 
         </div>
 
@@ -1137,6 +1054,9 @@
     let currentProfile = null;
     let selectedUser = "";
     let profileBusy = false;
+    let discoverLoading = false;
+
+    const DISCOVER_LIMIT = 50;
 
 
     /* AUTH GUARD */
@@ -1156,6 +1076,7 @@
 
         loadProfile();
         loadSkills();
+        loadDiscover();
 
     })();
 
@@ -1348,6 +1269,284 @@
         }
 
     }
+
+
+    /* DISCOVER — PENGGUNA NYATA DARI SUPABASE */
+
+    function makeEl(tag, className, text) {
+
+        const el = document.createElement(tag);
+
+        if (className) {
+            el.className = className;
+        }
+
+        if (text !== undefined && text !== null) {
+            el.textContent = text;
+        }
+
+        return el;
+
+    }
+
+
+    // Avatar untuk pengguna lain (tidak terkait currentProfile)
+    function setPlainAvatar(element, url, initials) {
+
+        element.textContent = initials;
+
+        if (!url || !/^https:\/\//i.test(url)) {
+            return;
+        }
+
+        const img = new Image();
+
+        img.onload = function() {
+
+            element.style.backgroundImage =
+                'url("' + url.replace(/"/g, "%22") + '")';
+            element.style.backgroundSize = "cover";
+            element.style.backgroundPosition = "center";
+            element.textContent = "";
+
+        };
+
+        img.src = url;
+
+    }
+
+
+    function setDiscoverStatus(message, withRetry) {
+
+        const box = document.getElementById("discoverStatus");
+
+        box.replaceChildren();
+
+        if (!message) {
+            box.classList.remove("show");
+            return;
+        }
+
+        box.appendChild(makeEl("div", "", message));
+
+        if (withRetry) {
+
+            const retry = makeEl("button", "btn", "Coba lagi");
+            retry.type = "button";
+            retry.style.marginTop = "12px";
+            retry.onclick = loadDiscover;
+
+            box.appendChild(retry);
+
+        }
+
+        box.classList.add("show");
+
+    }
+
+
+    function makeSkillSection(labelText, list, isNeed) {
+
+        const section = makeEl("div", "skill-section");
+
+        section.appendChild(makeEl("div", "label", labelText));
+
+        if (!list.length) {
+
+            section.appendChild(makeEl("div", "mini-empty", "Belum ada skill."));
+
+        } else {
+
+            list.forEach(function(skillName) {
+                section.appendChild(
+                    makeEl("span", "skill" + (isNeed ? " need" : ""), skillName)
+                );
+            });
+
+        }
+
+        return section;
+
+    }
+
+
+    function buildUserCard(profile, skills) {
+
+        const name = profile.display_name || profile.username || "Pengguna";
+
+        const card = makeEl("div", "user-card");
+
+        card.dataset.search = [name, profile.username, profile.country]
+            .concat(skills.offered, skills.wanted)
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+        // Bagian atas: avatar + nama
+        const top = makeEl("div", "user-top");
+
+        const avatar = makeEl("div", "big-avatar");
+        setPlainAvatar(avatar, profile.avatar_url, getInitials(name));
+        top.appendChild(avatar);
+
+        const info = makeEl("div");
+        info.appendChild(makeEl("div", "user-name", name));
+
+        const meta = [];
+
+        if (profile.username) {
+            meta.push("@" + profile.username);
+        }
+
+        if (profile.country) {
+            meta.push(profile.country);
+        }
+
+        if (meta.length) {
+            info.appendChild(makeEl("div", "user-meta", meta.join(" · ")));
+        }
+
+        top.appendChild(info);
+        card.appendChild(top);
+
+        // Bio singkat
+        if (profile.bio) {
+            card.appendChild(makeEl("div", "user-bio", profile.bio));
+        }
+
+        // Skill
+        card.appendChild(makeSkillSection("Dia menawarkan", skills.offered, false));
+        card.appendChild(makeSkillSection("Dia membutuhkan", skills.wanted, true));
+
+        // Tombol
+        const actions = makeEl("div", "card-actions");
+
+        const skipBtn = makeEl("button", "btn", "Lewati");
+        skipBtn.type = "button";
+        skipBtn.addEventListener("click", function() {
+
+            skipUser(name);
+
+            card.remove();
+
+            if (!document.getElementById("userCards").children.length) {
+                document.getElementById("discoverNoResult").classList.remove("show");
+                setDiscoverStatus("Tidak ada rekomendasi lagi untuk saat ini.");
+            }
+
+        });
+
+        const swapBtn = makeEl("button", "btn primary", "↔ Swap");
+        swapBtn.type = "button";
+        swapBtn.addEventListener("click", function() {
+            requestSwap(name);
+        });
+
+        actions.appendChild(skipBtn);
+        actions.appendChild(swapBtn);
+        card.appendChild(actions);
+
+        return card;
+
+    }
+
+
+    async function loadDiscover() {
+
+        if (!currentUser || discoverLoading) {
+            return;
+        }
+
+        discoverLoading = true;
+
+        const container = document.getElementById("userCards");
+
+        container.replaceChildren();
+        document.getElementById("discoverNoResult").classList.remove("show");
+        setDiscoverStatus("Memuat pengguna...", false);
+
+        try {
+
+            const profilesRes = await sb
+                .from("profiles")
+                .select("id, username, display_name, bio, avatar_url, country")
+                .neq("id", currentUser.id)
+                .order("created_at", { ascending: false })
+                .limit(DISCOVER_LIMIT);
+
+            if (profilesRes.error) {
+                throw profilesRes.error;
+            }
+
+            const profiles = profilesRes.data || [];
+
+            if (!profiles.length) {
+                setDiscoverStatus("Belum ada pengguna lain yang terdaftar.");
+                return;
+            }
+
+            const ids = profiles.map(function(p) {
+                return p.id;
+            });
+
+            const skillsRes = await sb
+                .from("user_skills")
+                .select("user_id, skill_name, skill_type")
+                .in("user_id", ids)
+                .order("created_at", { ascending: true });
+
+            if (skillsRes.error) {
+                throw skillsRes.error;
+            }
+
+            const skillsByUser = {};
+
+            (skillsRes.data || []).forEach(function(row) {
+
+                if (!skillsByUser[row.user_id]) {
+                    skillsByUser[row.user_id] = { offered: [], wanted: [] };
+                }
+
+                if (row.skill_type === "offered") {
+                    skillsByUser[row.user_id].offered.push(row.skill_name);
+                } else if (row.skill_type === "wanted") {
+                    skillsByUser[row.user_id].wanted.push(row.skill_name);
+                }
+
+            });
+
+            setDiscoverStatus("");
+
+            profiles.forEach(function(profile) {
+
+                const skills = skillsByUser[profile.id] ||
+                    { offered: [], wanted: [] };
+
+                container.appendChild(buildUserCard(profile, skills));
+
+            });
+
+            // Terapkan pencarian yang mungkin sudah diketik
+            searchUsers();
+
+        } catch (err) {
+
+            console.error("Gagal memuat Discover:", err);
+
+            container.replaceChildren();
+            setDiscoverStatus(
+                "Gagal memuat pengguna. Periksa koneksi lalu coba lagi.",
+                true
+            );
+
+        } finally {
+
+            discoverLoading = false;
+
+        }
+
+    }
+
 
     /* SKILL — BACA, TAMBAH, HAPUS */
 
@@ -1552,7 +1751,9 @@
             if (error) {
                 console.error("Gagal memuat profil:", error);
                 showProfileError("Gagal memuat data profil. Tutup lalu coba lagi.");
-                setProfileFormBusy(false);
+                document.getElementById("profileCancelBtn").disabled = false;
+                profileBusy = false;
+                return;
             }
 
             if (!data) {
@@ -1796,14 +1997,17 @@
         const cards =
             document.querySelectorAll(".user-card");
 
+        let visible = 0;
+
         cards.forEach(card => {
 
             const data =
-                card.dataset.search;
+                card.dataset.search || "";
 
             if (data.includes(query)) {
 
                 card.style.display = "";
+                visible++;
 
             } else {
 
@@ -1812,6 +2016,10 @@
             }
 
         });
+
+        document
+            .getElementById("discoverNoResult")
+            .classList.toggle("show", cards.length > 0 && visible === 0);
 
     }
 
