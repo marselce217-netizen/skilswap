@@ -2025,9 +2025,79 @@
     }
 
 
+    
     /* SWAP */
 
     function requestSwap(userId, userName) {
+
+        if (!currentUser || !userId || userId === currentUser.id) {
+            showToast("Akun penerima tidak valid.");
+            return;
+        }
+
+        selectedUserId = userId;
+        selectedUser = userName;
+
+        document.getElementById("modalTitle").textContent =
+            "Kirim Skill Swap";
+
+        document.getElementById("modalText").textContent =
+            "Kamu ingin mengirim permintaan Skill Swap kepada " +
+            userName +
+            "? Permintaan akan dikirim ke akun ini.";
+
+        document.getElementById("modal").classList.add("show");
+    }
+
+
+    async function confirmAction() {
+
+        if (!currentUser || !selectedUserId) {
+            showToast("Pengguna atau tujuan Swap belum ditemukan.");
+            return;
+        }
+
+        const { data: existing, error: checkError } = await sb
+            .from("skill_swap_requests")
+            .select("id")
+            .eq("sender_id", currentUser.id)
+            .eq("receiver_id", selectedUserId)
+            .eq("status", "pending")
+            .limit(1);
+
+        if (checkError) {
+            console.error(checkError);
+            showToast("Gagal memeriksa permintaan Swap.");
+            return;
+        }
+
+        if (existing && existing.length > 0) {
+            showToast("Permintaan Swap masih menunggu.");
+            closeModal();
+            return;
+        }
+
+        const { error } = await sb
+            .from("skill_swap_requests")
+            .insert({
+                sender_id: currentUser.id,
+                receiver_id: selectedUserId,
+                status: "pending"
+            });
+
+        if (error) {
+            console.error(error);
+            showToast("Permintaan Swap gagal dikirim.");
+            return;
+        }
+
+        closeModal();
+        selectedUserId = "";
+        selectedUser = "";
+
+        showToast("Permintaan Skill Swap berhasil dikirim!");
+    }
+
 
     if (!userId || userId === currentUser.id) {
         showToast("Akun penerima tidak valid.");
